@@ -2,6 +2,7 @@
 #include "game.h"
 #include "lcd.h"
 #include "button.h"
+//#include "lcd.c"
 
 void init_timer();
 void init_buttons();
@@ -17,7 +18,7 @@ int main(void) {
 
     LCDinit();
 
-    LCDclear();
+    LCDclr();
     unsigned char position = 0x80;
     unsigned char player = initPlayer();
     int checkButton = 0;
@@ -26,14 +27,46 @@ int main(void) {
     init_buttons();
     __enable_interrupt();
            printPlayer(player);
+
+
+
+
     while(1)
     {
+    	printPlayer(position);
+    					checkButton = buttonPoll();
 
+    	                if (position == 0xC7) {
+    	                		LCDclr();
+    	                		cursorToLineOne();
+    	                		writeString("you");
+    	                		cursorToLineTwo();
+    	                		writeString("win");
+    	                        checkButton = buttonPoll();
+    	                        position = initPlayer();
+
+    	                } else {
+    	                		position = movePlayer(position, checkButton);
+    	                        printPlayer(position);
+    	                        __delay_cycles(0x44444);
+    	                }
 
     }
 
+
+
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
 
 #pragma vector=TIMER0_A1_VECTOR
 __interrupt void TIMER0_A1_ISR()
