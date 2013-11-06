@@ -1,55 +1,62 @@
 #include <msp430.h>
 #include "game.h"
-#include "button/buttons.h"
-#include "LCD/LCD.h"
+#include "lcd.h"
+#include "button.h"
 
 void init_timer();
 void init_buttons();
 
-int main(void)
-{
-        WDTCTL = (WDTPW|WDTHOLD);
+int TIMER = 0; //tracks if game is in progress or lost
+int LOSE = 0;
+int GAMEOVER = 0;
 
-        unsigned char player = initPlayer();
+int main(void) {
+    WDTCTL = WDTPW | WDTHOLD;        // Stop watchdog timer
 
-        init_timer();
-        init_buttons();
-        __enable_interrupt();
+    initSPI();
 
-        while(1)
-        {
-                /*
-                 * while (game is on)
-                 * {
-                 *                 check if button is pushed (you don't want to block here, so don't poll!)
-                 *                 if button is pushed:
-                 *                         clear current player marker
-                 *                         update player position based on direction
-                 *                         print new player
-                 *                         clear two second timer
-                 *                         wait for button release (you can poll here)
-                 * }
-                 *
-                 * print game over or you won, depending on game result
-                 *
-                 * wait for button press to begin new game (you can poll here)
-                 * wait for release before starting again
-                 */
-        }
+    LCDinit();
 
-        return 0;
+    LCDclear();
+    unsigned char position = 0x80;
+    unsigned char player = initPlayer();
+    int checkButton = 0;
+
+    init_timer();
+    init_buttons();
+    __enable_interrupt();
+           printPlayer(player);
+    while(1)
+    {
+
+
+    }
+
+    return 0;
 }
 
-//
-// YOUR TIMER A ISR GOES HERE
-//
+#pragma vector=TIMER0_A1_VECTOR
+__interrupt void TIMER0_A1_ISR()
+{
+    TACTL &= ~TAIFG;            // clear interrupt flag
+    TIMER += 1;
+    if (TIMER == 4){
+            LOSE = 1;
+    }
+}
 
 void init_timer()
 {
-        // do timer initialization work
+         TACTL &= ~(MC1|MC0);
+         TACTL |= TACLR;
+         TACTL |= TASSEL1;
+         TACTL |= ID1|ID0;
+         TACTL &= ~TAIFG;
+         TACTL |= MC1;
+         TACTL |= TAIE;
 }
 
 void init_buttons()
 {
-        // do button initialization work
+        configureP1PinAsButton(BIT1|BIT2|BIT3|BIT4);
 }
