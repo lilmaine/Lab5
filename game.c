@@ -1,6 +1,7 @@
 #include <msp430g2553.h>
 #include "game.h"
 #include "lcd.h"
+#include "button.h"
 
 unsigned char initPlayer()
 {
@@ -47,38 +48,63 @@ unsigned char movePlayer(unsigned char player, unsigned char direction)
         return player;
 }
 
-void updatePlayer(unsigned char player){ //update the position of the player based off the button pushed
-	if(isP1ButtonPressed(BIT1))
-	        {
-	                            clearPlayer(player);
-	                            player = movePlayer(player, RIGHT);
-	                            printPlayer(player);
-	                            waitForP1ButtonRelease(BIT1);
-	                            debounce();
-	                    }
-	                    else if(isP1ButtonPressed(BIT2)){
-	                            clearPlayer(player);
-	                            player = movePlayer(player, LEFT);
-	                            printPlayer(player);
-	                            waitForP1ButtonRelease(BIT2);
-	                            debounce();
-	                    }
-	                    else if(isP1ButtonPressed(BIT3)){
-	                            clearPlayer(player);
-	                            player = movePlayer(player, UP);
-	                            printPlayer(player);
-	                            waitForP1ButtonRelease(BIT3);
-	                            debounce();
-	                    }
-	                    else if(isP1ButtonPressed(BIT4)){
-	                            clearPlayer(player);
-	                            player = movePlayer(player, DOWN);
-	                            printPlayer(player);
-	                            waitForP1ButtonRelease(BIT4);
-	                            debounce();
-	                    }
+unsigned char updatePlayer(unsigned char buttonPressed, unsigned char position) {
+
+        if (buttonPressed == 1) {
+                clearPlayer(position);
+                position = movePlayer(position, RIGHT);
+                printPlayer(position);
+
+        }
+
+        else if (buttonPressed == 2) {
+                clearPlayer(position);
+                position = movePlayer(position, LEFT);
+                printPlayer(position);
+        }
+
+        else if (buttonPressed == 3) {
+                clearPlayer(position);
+                position = movePlayer(position, UP);
+                printPlayer(position);
+        }
+
+        else if (buttonPressed == 4) {
+                clearPlayer(position);
+                position = movePlayer(position, DOWN);
+                printPlayer(position);
+        }
+
+
+return position;
 }
 
+int buttonPoll() {
+
+        int buttonPressed = 0;
+        while (buttonPressed == 0) {
+                if ((P1IN & BIT1)== 0){
+                        buttonPressed = 1;
+                        return buttonPressed;
+                }
+
+                if ((P1IN & BIT2)== 0){
+                        buttonPressed = 2;
+                        return buttonPressed;
+                }
+
+                if ((P1IN & BIT3)== 0){
+                        buttonPressed = 3;
+                        return buttonPressed;
+                }
+
+                if ((P1IN & BIT4)== 0){
+                                        buttonPressed = 4;
+                                        return buttonPressed;
+                                }
+        }
+        return buttonPressed;
+}
 
 
 char didPlayerWin(unsigned char player)
